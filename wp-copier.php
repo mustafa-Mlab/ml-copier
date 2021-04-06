@@ -76,7 +76,8 @@ add_action( 'rest_api_init', 'custom_api_get_all_posts' );
 function custom_api_get_all_posts() {
     register_rest_route( 'custom/v1', '/all-posts', array(
         'methods' => 'GET',
-        'callback' => 'custom_api_get_all_posts_callback'
+        'callback' => 'custom_api_get_all_posts_callback',
+        'permission_callback' => '__return_true',
     ));
 }
 
@@ -177,4 +178,31 @@ function save_attachement( $args = [
     ); 
   }
 
+ }
+
+/**
+ * Process meta data 
+ * @param $meta array
+ * @return Array of processed data
+ */
+
+ function processMetadatas( $meta, $upload_dir ){
+  if(is_array($meta)){
+    foreach ($meta as $key => $value){
+      $meta[$key] = processMetadatas($value, $upload_dir);
+    }
+  }else{
+    $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
+    
+    $ext = explode('.', $meta);
+    if(in_array(end($ext), $supported_image)){
+      $attachmentDetails = save_attachement( array('url' => $meta, 'mainServerLocation' => $upload_dir ) );
+      if( $attachmentDetails['url'] ){
+        $meta = $attachmentDetails['url'];
+      }else{
+        $meta = wp_get_attachment_url($attachmentDetails['id']);
+      }
+    }
+  }
+  return $meta;
  }
