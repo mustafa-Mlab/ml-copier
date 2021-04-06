@@ -26,8 +26,22 @@ $flag = false;
             }
             unset($postArray['ID']);
             unset($postArray['guid']);
+            // $postContent = $postArray['post_content'];
+            // preg_match_all('/<img[^>]+>/i',$postContent, $result); 
+            // $img = array();
+            // foreach( $result as $implementedResult){
+            //   foreach( $implementedResult as $img_tag){
+            //     echo '<pre> <h1> Img Tag </h1>'; var_dump($img_tag); echo '</pre>';
+            //     preg_match_all('/(src=")([^"]*)"/i',$img_tag, $img[$img_tag]);
+            //   }
+
+            // }
+            // echo "<pre>";
+            // print_r($img);
+            // var_dump(" Original Contetnt : ", $postArray);
+            // echo "</pre>";
+
             $postArray['post_author'] = get_current_user_id();
-            
             $newID = wp_insert_post($postArray); // Inserting new post 
             
             // Now we have new post Id in $newID lets add all metas
@@ -60,17 +74,23 @@ $flag = false;
                     if(is_serialized( $innerArrayMetaValue )){
                       $thisInnerArrayMetaValue = unserialize($innerArrayMetaValue);
                       foreach($thisInnerArrayMetaValue as $metaValuename => $metaValueData){
-                        $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
-                      
-                        $ext = explode('.', $metaValueData);
-                        if(in_array(end($ext), $supported_image)){
-                          $attachmentDetails = save_attachement( array('url' => $metaValueData, 'mainServerLocation' => $data->upload_dir ) );
-                          if( $attachmentDetails['url'] ){
-                            $thisInnerArrayMetaValue[$metaValuename] = $attachmentDetails['url'];
-                          }else{
-                            $thisInnerArrayMetaValue[$metaValuename] = wp_get_attachment_url($attachmentDetails['id']);
-                          }
-                        }
+                        $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir);
+                        // if(is_array($metaValueData)){
+                        //   foreach($metaValueData as $repeatableKey => $repeatableValue){
+                        //     echo '<pre>'; var_dump($metaValuename, $repeatableValue); echo '</pre>'; 
+                            
+                        //   }
+                        // }
+                        // $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
+                        // $ext = explode('.', $metaValueData);
+                        // if(in_array(end($ext), $supported_image)){
+                        //   $attachmentDetails = save_attachement( array('url' => $metaValueData, 'mainServerLocation' => $data->upload_dir ) );
+                        //   if( $attachmentDetails['url'] ){
+                        //     $thisInnerArrayMetaValue[$metaValuename] = $attachmentDetails['url'];
+                        //   }else{
+                        //     $thisInnerArrayMetaValue[$metaValuename] = wp_get_attachment_url($attachmentDetails['id']);
+                        //   }
+                        // }
                       }
                       add_post_meta($newID, $postMetaKey, $thisInnerArrayMetaValue);
                     }else{
