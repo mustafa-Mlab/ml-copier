@@ -26,20 +26,28 @@ $flag = false;
             }
             unset($postArray['ID']);
             unset($postArray['guid']);
-            // $postContent = $postArray['post_content'];
-            // preg_match_all('/<img[^>]+>/i',$postContent, $result); 
-            // $img = array();
-            // foreach( $result as $implementedResult){
-            //   foreach( $implementedResult as $img_tag){
-            //     echo '<pre> <h1> Img Tag </h1>'; var_dump($img_tag); echo '</pre>';
-            //     preg_match_all('/(src=")([^"]*)"/i',$img_tag, $img[$img_tag]);
-            //   }
 
-            // }
-            // echo "<pre>";
-            // print_r($img);
-            // var_dump(" Original Contetnt : ", $postArray);
-            // echo "</pre>";
+
+            $postContent = $postArray['post_content'];
+            preg_match_all('/<img[^>]+>/i',$postContent, $result); 
+            $img = array();
+            foreach( $result as $implementedResult){
+              foreach( $implementedResult as $img_tag){
+                preg_match_all('/(src=")([^"]*)"/i',$img_tag, $img[$img_tag]);
+              }
+            }
+            $processedImg = array();
+            foreach($img as $imgKey => $imgTag){
+              $attachmentDetails = save_attachement( 
+                array( 'url' => preg_replace('/(-[0-9]*x[0-9]*)/m', '', end($imgTag)[0]), 'mainServerLocation' => $data->upload_dir ) 
+              );
+              if($attachmentDetails['id']){
+                $processedImg[end($imgTag)[0]] = $attachmentDetails['id'];
+              }else{
+                $processedImg[end($imgTag)[0]] = $attachmentDetails['url'];
+              }
+            }
+
 
             $postArray['post_author'] = get_current_user_id();
             $newID = wp_insert_post($postArray); // Inserting new post 
@@ -75,22 +83,7 @@ $flag = false;
                       $thisInnerArrayMetaValue = unserialize($innerArrayMetaValue);
                       foreach($thisInnerArrayMetaValue as $metaValuename => $metaValueData){
                         $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir);
-                        // if(is_array($metaValueData)){
-                        //   foreach($metaValueData as $repeatableKey => $repeatableValue){
-                        //     echo '<pre>'; var_dump($metaValuename, $repeatableValue); echo '</pre>'; 
-                            
-                        //   }
-                        // }
-                        // $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
-                        // $ext = explode('.', $metaValueData);
-                        // if(in_array(end($ext), $supported_image)){
-                        //   $attachmentDetails = save_attachement( array('url' => $metaValueData, 'mainServerLocation' => $data->upload_dir ) );
-                        //   if( $attachmentDetails['url'] ){
-                        //     $thisInnerArrayMetaValue[$metaValuename] = $attachmentDetails['url'];
-                        //   }else{
-                        //     $thisInnerArrayMetaValue[$metaValuename] = wp_get_attachment_url($attachmentDetails['id']);
-                        //   }
-                        // }
+                        
                       }
                       add_post_meta($newID, $postMetaKey, $thisInnerArrayMetaValue);
                     }else{
@@ -101,7 +94,7 @@ $flag = false;
                 }
               }
               
-              //     $thisItemValue[$thisIndex] = str_replace($url, $_SERVER['HTTP_ORIGIN'], $thisValue);
+              // $thisItemValue[$thisIndex] = str_replace($url, $_SERVER['HTTP_ORIGIN'], $thisValue);
             } 
           }
         }
