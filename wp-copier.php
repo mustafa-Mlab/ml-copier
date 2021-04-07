@@ -137,14 +137,17 @@ function save_attachement( $args = [
   'id' => null
 ]){
   
+  // echo '<pre>'; var_dump($args); echo '</pre>'; 
   $upload_dir = wp_upload_dir();
   $image_data = file_get_contents( $args['url'] );
   $filename = basename( $args['url'] );
   
-  $uploadNeeded = true;
+
 
   $thisImagePath = str_replace($args['mainServerLocation']->baseurl, '', $args['url']);
   if(file_exists($upload_dir['basedir'] . '/' . $thisImagePath )){
+    // echo "Exist : " . $thisImagePath;
+
     return array(
       'url' => $upload_dir['baseurl'] . $thisImagePath ,
       'id' => (array_key_exists('id', $args))? $args['id'] : null
@@ -172,6 +175,7 @@ function save_attachement( $args = [
     require_once( ABSPATH . 'wp-admin/includes/image.php' );
     $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
     $attachmentIS = wp_update_attachment_metadata( $attach_id, $attach_data );
+    // echo "Not exist : " . wp_get_attachment_url($attach_id) ;
     return array(
       'url' => null,
       'id' => $attach_id
