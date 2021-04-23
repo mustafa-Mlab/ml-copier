@@ -110,6 +110,16 @@ function custom_api_get_all_posts() {
         'callback' => 'custom_api_get_all_posts_callback',
         'permission_callback' => '__return_true',
     ));
+  
+   /** 
+   * Get all posts id and title with url
+   */
+    register_rest_route( 'custom/v1', '/all-posts-grab', array(
+      'methods' => 'GET',
+      'callback' => 'custom_api_get_all_posts_grab_callback',
+      'permission_callback' => '__return_true',
+  ));
+
   /** 
    * Get post Data by id
    */
@@ -157,7 +167,6 @@ function custom_api_get_all_posts_callback( $request ) {
     
     $posts = get_posts( array(
             'paged' => $paged,
-            'post__not_in' => get_option( 'sticky_posts' ),
             'posts_per_page' => -1,            
             'post_type' => array_values($allPostTypes) // This is the line that allows to fetch multiple post types. 
         )
@@ -186,6 +195,17 @@ function custom_api_get_all_posts_callback( $request ) {
     return $posts_data;                   
 } 
 
+
+function custom_api_get_all_posts_grab_callback( $request ){
+  // Initialize the array that will receive the posts' data. 
+  $posts = get_posts( array(
+    'posts_per_page' => -1,            
+    'post_type' => $request->get_param('post_type') // This is the line that allows to fetch multiple post types. 
+  ));
+             
+  return $posts; 
+
+}
 
 function custom_api_get_posts_callback( $request ) {
     // Initialize the array that will receive the posts' data. 
@@ -311,3 +331,24 @@ function save_attachement( $args = [
 }
 
 add_action('init', 'register_my_session');
+
+
+/**
+ * Enqueue a script in the WordPress admin on copier page.
+ *
+ * @param int $hook Hook suffix for the current admin page.
+ */
+function add_custom_css_to_admin( $hook ) {
+  if ( 'toplevel_page_wp-copier/options-settings' == $hook || 'top-copier-settings_page_wp-copier/copy_by_id' == $hook ) {
+    wp_enqueue_script( 'wp_copier_custom_js', plugin_dir_url( __FILE__ ) . 'admin/assets/admin.js', array('jquery'), '1.0' );
+    wp_enqueue_style( 'wp_copier_custom_css', plugin_dir_url( __FILE__ ) . 'admin/assets/admin.css', '', '1');
+  }
+}
+add_action( 'admin_enqueue_scripts', 'add_custom_css_to_admin' );
+
+/** 
+ * /Users/mustofakamal/Sites/myforks/ml-global/mlbdlocal/wp-content/plugins/wp-copier
+ * /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext
+ * rm -rf /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext/wp-copier/*
+ * cp -r /Users/mustofakamal/Sites/myforks/ml-global/mlbdlocal/wp-content/plugins/wp-copier/. /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext/wp-copier
+ */
