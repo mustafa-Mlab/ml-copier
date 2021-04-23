@@ -62,6 +62,15 @@ function wp_copier_add_settings_page() {
         plugins_url( 'wp-copier/images/icon.png' ),
         6
     );
+    add_submenu_page(
+      'wp-copier/options-settings.php',
+      __( 'Copy by ID', 'wp_copier' ),
+      __( 'Copy by ID', 'wp_copier' ),
+      'manage_options',
+      'wp-copier/copy_by_id.php',
+      'add_ids_page',
+      6
+    );
 }
 add_action( 'admin_menu', 'wp_copier_add_settings_page' );
 
@@ -71,14 +80,48 @@ function add_settings_page(){
 }
 
 
+function add_ids_page(){
+  require_once('admin/gui/add_ids_page.php');
+}
+
+
+/**
+ * Adding new rest endpoint to get data from the second server
+ * There will be 3 API endpoints
+ * 1. To get all the post_IDs for single or multiple post type with limit and order
+ * 2. To get single post data by ID
+ */
 add_action( 'rest_api_init', 'custom_api_get_all_posts' );   
 
 function custom_api_get_all_posts() {
+  /**
+   * Get all post types and taxonomies list
+   */
+  register_rest_route( 'custom/v1', '/all-posts-types', array(
+    'methods' => 'GET',
+    'callback' => 'custom_api_get_all_posts_types_callback',
+    'permission_callback' => '__return_true',
+  ));
+  /** 
+   * Get post types posts's id with post type assign terms
+   */
     register_rest_route( 'custom/v1', '/all-posts', array(
         'methods' => 'GET',
         'callback' => 'custom_api_get_all_posts_callback',
         'permission_callback' => '__return_true',
     ));
+  /** 
+   * Get post Data by id
+   */
+    register_rest_route( 'custom/v1', '/my-posts', array(
+        'methods' => 'GET',
+        'callback' => 'custom_api_get_posts_callback',
+        'permission_callback' => '__return_true',
+    ));
+}
+
+function custom_api_get_all_posts_types_callback($request){
+  return ['post_types' =>  get_post_types(), 'taxonomies' => get_taxonomies('', 'objects')]; 
 }
 
 function custom_api_get_all_posts_callback( $request ) {
@@ -86,6 +129,7 @@ function custom_api_get_all_posts_callback( $request ) {
     $posts_data = array();
     // Receive and set the page parameter from the $request for pagination purposes
     $paged = $request->get_param( 'page' );
+    $limit = $request->get_param( 'limit' );
     $paged = ( isset( $paged ) || ! ( empty( $paged ) ) ) ? $paged : 1; 
     $postType = ($request->get_param('post_type'))? $request->get_param('post_type') : 0;
     // Get the posts using the 'post' and 'news' post types
@@ -101,6 +145,15 @@ function custom_api_get_all_posts_callback( $request ) {
     }else{
       $allPostTypes = array($postType);
     }
+
+    $terms = get_object_taxonomies( $allPostTypes );
+
+    /**
+     * order, limit, 
+     * Return array should be like [ post_type => [posts =>[single_posts], terms], upload_directory]
+     * So that we can access part by part
+     * query will have pagination and order 
+     */
     
     $posts = get_posts( array(
             'paged' => $paged,
@@ -108,19 +161,55 @@ function custom_api_get_all_posts_callback( $request ) {
             'posts_per_page' => -1,            
             'post_type' => array_values($allPostTypes) // This is the line that allows to fetch multiple post types. 
         )
-    ); 
+    );
     // Loop through the posts and push the desired data to the array we've initialized earlier in the form of an object
     foreach( $posts as $post ) {
         $id = $post->ID; 
         $post_thumbnail = ( has_post_thumbnail( $id ) ) ? get_the_post_thumbnail_url( $id ) : null;
 
+        $taxData= [];
+        foreach($terms as $key => $value){
+          if( get_the_terms($id, $value) ){
+            $taxData[] = get_the_terms($id, $value);
+          }
+        }
         $posts_data[] = (object) array( 
             'post' => get_post($id, 'ARRAY_A'), 
             'post_meta' => get_post_meta($id), 
             'featured_img_src' => $post_thumbnail,
-            'upload_dir' => wp_upload_dir()
+            'upload_dir' => wp_upload_dir(),
+            // 'terms' => get_the_terms($id, $terms),
+            'terms' => $taxData,
+            // 'post-types' => $postType
         );
-    }                  
+    }                 
+    return $posts_data;                   
+} 
+
+
+function custom_api_get_posts_callback( $request ) {
+    // Initialize the array that will receive the posts' data. 
+    $posts_data = array();
+    $id = $request->get_param('key');
+    $post_type = get_post_type($id);
+    $terms = get_object_taxonomies( $post_type );
+    
+    $post_thumbnail = ( has_post_thumbnail( $id ) ) ? get_the_post_thumbnail_url( $id ) : null;
+
+    $taxData= [];
+    foreach($terms as $key => $value){
+      if( get_the_terms($id, $value) ){
+        $taxData[] = get_the_terms($id, $value);
+      }
+    }
+    $posts_data[] = (object) array( 
+        'post' => get_post($id, 'ARRAY_A'), 
+        'post_meta' => get_post_meta($id), 
+        'featured_img_src' => $post_thumbnail,
+        'upload_dir' => wp_upload_dir(),
+        'terms' => $taxData,
+        'post_type' => $post_type
+    );             
     return $posts_data;                   
 } 
 
@@ -210,3 +299,15 @@ function save_attachement( $args = [
   }
   return $meta;
  }
+
+
+
+ function register_my_session()
+{
+  if( !session_id() )
+  {
+    session_start();
+  }
+}
+
+add_action('init', 'register_my_session');

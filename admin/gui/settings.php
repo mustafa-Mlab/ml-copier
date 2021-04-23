@@ -1,22 +1,40 @@
 <?php 
-$url = '';
-$checkboxArray = [];
+$url = isset($_SESSION['url'])? $_SESSION['url'] : '';
 $flag = false;
-  if( isset($_POST['submit'])){
+$copyFlag = false;
+$list = [];
+if(isset($_POST['list'])){
+  if( isset($_POST['url']) && ! empty($_POST['url']) ){
+    $_SESSION['url'] = rtrim($_POST['url'], "/");
+    $url = $_SESSION['url'];
+    if(!isset($_SESSION['list']) || $_SESSION['url'] != $url )
+    $_SESSION['list'] = json_decode(file_get_contents($url . '/wp-json/custom/v1/all-posts-types'));
+    $list = $_SESSION['list'];
     $flag = 1;
-    if( isset($_POST['url']) && ! empty($_POST['url'])){
-      $url = rtrim($_POST['url'], "/");
-    }else{
-      $flag = 0;
-    }
+  }else{
+    $flag = 0;
+  } 
+}
+
+$checkboxArray = [];
+$taxArray = [];
+  if( isset($_POST['submit'])){
+    $copyFlag = 1;
+     
     if( isset($_POST['checkboxArray']) && ! empty($_POST['checkboxArray'])){
       $checkboxArray = $_POST['checkboxArray'];
     }else{
-      $flag = 0;
+      $copyFlag = 0;
     }
-    if($flag){
+    $limit = (isset($_POST['limit']) && ! empty($_POST['limit']))? $_POST['limit'] : -1;
+    $orderBy = (isset($_POST['order-by']) && ! empty($_POST['order-by']))? $_POST['order-by'] : 'none';
+    $order = (isset($_POST['order']) && ! empty($_POST['order']))? $_POST['order'] : 'ASC';
+
+    if($copyFlag){
+      unset($_SESSION['list']);
       foreach( $checkboxArray as $key => $value){
-        $posts = json_decode(file_get_contents($url . '/wp-json/custom/v1/all-posts?post_type='. $value));
+        $posts = json_decode(file_get_contents($url . "/wp-json/custom/v1/all-posts?post_type={$value}" ));
+        // &limit={$limit}&order-by={$orderBy}&order={$order}
         foreach($posts as $index => $data){
           if(! post_exists($data->post->post_title, '', '', $value)){
             // Create the post first
@@ -24,10 +42,10 @@ $flag = false;
             foreach($data->post as $itemKey => $itemValue){
               $postArray[$itemKey] = $itemValue; 
             }
-            unset($postArray['ID']);
-            unset($postArray['guid']);
+            unset($postArray['ID']); // Wordpress will assign a new Id
+            unset($postArray['guid']); // Wordpress will add new guid
 
-
+            /** upload respactive image inside post content */
             $postContent = $postArray['post_content'];
             preg_match_all('/<img[^>]+>/i',$postContent, $result); 
             $img = array();
@@ -47,10 +65,24 @@ $flag = false;
                 $processedImg[end($imgTag)[0]] = $attachmentDetails['url'];
               }
             }
-
-
-            $postArray['post_author'] = get_current_user_id();
+            /** upload respactive image inside post content */
+            
+            $postArray['post_author'] = get_current_user_id(); // Current user will be the author of this post
             $newID = wp_insert_post($postArray); // Inserting new post 
+
+            $terms = $data->terms;
+            
+            foreach ($terms as $objectArrayKey => $objectArrayValue){
+              foreach($objectArrayValue as $key => $value){
+                if(term_exists( $value->slug, $value->taxonomy )){
+                  $thisTerm = term_exists( $value->slug, $value->taxonomy );
+                }else{
+                  $thisTerm = wp_insert_term($value->name, $value->taxonomy, array('description' => $value->description, 'parent' => $value->parent, 'slug' => $value->slug  ) );
+                }
+                wp_set_object_terms( $newID, (int)$thisTerm['term_id'], $value->taxonomy );
+              }
+            }
+
             
             // Now we have new post Id in $newID lets add all metas
             $postMeta = $data->post_meta;
@@ -101,6 +133,10 @@ $flag = false;
       }
     }
   }
+  if( ! $flag && ! $copyFlag){
+    unset($_SESSION['url']);
+    unset($_SESSION['list']);
+  }
 ?>
 
 <div class="wrap">
@@ -114,28 +150,84 @@ $flag = false;
     echo '<div class="form-error">';
     echo "Please select at least one post type and input main site url ";
     echo '</div> <br><br>';
-  }
-  ?>
-  <form action="#" name="wp_copier_form" method="post">
+  }  ?>
+
+  <form action="#" name="list_form" method="post">
   <label for="url">Main Site URL</label>
   <input type="text" name="url" id="url" value="<?= $url;?>" required>
   <br>
   <br>
-  <?php 
-  $allPostTypes = get_post_types();
-  unset($allPostTypes['revision']);
-  unset($allPostTypes['nav_menu_item']);
-  unset($allPostTypes['custom_css']);
-  unset($allPostTypes['customize_changeset']);
-  unset($allPostTypes['oembed_cache']);
-  unset($allPostTypes['user_request']);
-  foreach($allPostTypes as $key => $value){
+  <input type="submit" value="Get Post Types and Taxonomies" name="list" >
+  </form>
+  <br>
+  <br>
+  <?php if( isset($_SESSION['list'])){  ?>
+
+    <form action="#" name="wp_copier_form" method="post">
+    <h2>Post Types</h2>
+    <?php 
+      $postTypes = $_SESSION['list']->post_types;
+      unset($postTypes->revision);
+      unset($postTypes->nav_menu_item);
+      unset($postTypes->custom_css);
+      unset($postTypes->customize_changeset);
+      unset($postTypes->oembed_cache);
+      unset($postTypes->user_request);
+      unset($postTypes->attachment);
+      foreach($postTypes as $key => $value){
     ?>
-    <input type="checkbox" name="checkboxArray[]" value="<?= $value; ?>" <?= ( $flag && in_array($value , $checkboxArray)) ? 'checked' :''; ?>>
-    <label> <?= ucfirst($value); ?></label><br>
-    <?php  } ?>
+        <input type="checkbox" name="checkboxArray[]" value="<?= $value; ?>" <?= ( $flag && in_array($value , $checkboxArray)) ? 'checked' :''; ?>>
+        <label> <?= ucfirst($value); ?></label><br>
+      <?php  } ?>
+    
     <br> <br>
+    <input type="text" name="posts_id" id= "posts_id" value="" placeholder="Posts IDs (comma Separated)">
+    <?php /**
+    <hr>
+    <h2>Taxonomies</h2>
+    <?php 
+      $taxonomies = $_SESSION['list']->taxonomies;
+      unset($taxonomies->nav_menu);
+      unset($taxonomies->link_category);
+      unset($taxonomies->post_format);
+      foreach($taxonomies as $key => $value){
+    ?>
+        <input type="checkbox" name="taxArray[]" value="<?= $value->name; ?>" <?= ( $flag && in_array($value->name , $taxArray)) ? 'checked' :''; ?>>
+        <label> <?= ucfirst($value->label .' --> ' . str_replace('"', '', json_encode( implode(',', $value->object_type)))); ?></label><br>
+      <?php  } ?>
+    
+    <br> <br>
+    <hr>
+    <label for="limit">Limit</label>
+    <input type="number" name="limit" id="limit" value="<?= ( isset( $_POST['limit'] ) )? $_POST['limit'] : "" ; ?>">
+    <br><br>
+    
+    <hr>
+    <label for="order-by">Order BY</label>
+    <select name="order-by" id="order-by" >
+      <option value="none" selected>None</option>
+      <option value="ID" >ID</option>
+      <option value="author" >Author</option>
+      <option value="title">Title</option>
+      <option value="name">Name</option>
+      <option value="date">Date</option>
+      <option value="modified">Modified</option>
+      <option value="rand">Rand</option>
+    </select>
+    <br><br>
+    <hr>
+    <label for="order">Order</label>
+    <select name="order" id="order" >
+      <option value="ASC">Ascending</option>
+      <option value="DESC">Descending</option>
+    </select>
+    <br><br>
+     */ ?>
     <input type="submit" value="Start Copy" name="submit" style="position: fixed; bottom: 50px; right: 2%;">
   </form>
+  <?php }  ?>
   </div>
 </div>
+
+<?php 
+
