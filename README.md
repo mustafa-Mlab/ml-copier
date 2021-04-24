@@ -1,20 +1,20 @@
 # WP Copier
 A simple plugin to migrate content from one live site to another
 
-# Details 
-Contributors: Mustafa Kamal Hossain
-Tags: Migration, Cop Content, Wordpress, Live Content
-Requires at least: 3.5
-Tested up to: 5.7
-Stable tag: 1.0.0
-Multisite Compitable: Yes
-License: GPLv3
-License URI: https://www.gnu.org/licenses/gpl-3.0.html
+## Development Details 
+- Contributors: Mustafa Kamal Hossain
+- Tags: Migration, Copy Content, Wordpress, Live Content
+- Requires at least: 3.5
+- Tested up to: 5.7
+- Stable tag: 1.0.0
+- Multisite Compitable: Yes
+- License: GPLv3
+- License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Migrate content from one live site to another.
 
 
-# Description 
+## Description 
 
 This plugin can copy content from onel live site to another. In order to copy content / posts this plugin need to be active on both server. If Multisite this plugin need to be Network Active.
 
