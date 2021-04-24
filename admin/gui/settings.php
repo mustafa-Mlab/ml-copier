@@ -268,7 +268,7 @@ $taxArray = [];
   <input type="text" name="url" id="url" value="<?= $url;?>" required>
   <br>
   <br>
-  <input type="submit" value="Get Post Types and Taxonomies" name="list" >
+  <input type="submit" value="Get Post Types List" name="list" >
   </form>
   <br>
   <br>

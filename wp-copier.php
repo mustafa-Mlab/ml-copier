@@ -16,9 +16,27 @@
  * Domain Path: /languages
  */
 
+
+ // Make sure we don't expose any info if called directly
+if ( ! defined( 'ABSPATH' ) ) {
+  echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
+  exit;
+}
+
+
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
   die;
+}
+
+if ( ! defined( 'WP_COPIER_FILE' ) ) {
+  define( 'WP_COPIER_FILE', __FILE__ );
+}
+
+if ( ! defined( 'WP_COPIER_PATH' ) ) {
+  define( 'WP_COPIER_PATH',
+    plugin_dir_path( WP_COPIER_FILE );
+  );
 }
 
 /**
