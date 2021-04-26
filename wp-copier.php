@@ -34,9 +34,7 @@ if ( ! defined( 'WP_COPIER_FILE' ) ) {
 }
 
 if ( ! defined( 'WP_COPIER_PATH' ) ) {
-  define( 'WP_COPIER_PATH',
-    plugin_dir_path( WP_COPIER_FILE );
-  );
+  define( 'WP_COPIER_PATH', plugin_dir_path( WP_COPIER_FILE ));
 }
 
 /**
