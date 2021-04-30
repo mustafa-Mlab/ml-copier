@@ -392,19 +392,3 @@ function add_custom_css_to_admin( $hook ) {
 }
 add_action( 'admin_enqueue_scripts', 'add_custom_css_to_admin' );
 
-/** 
- * /Users/mustofakamal/Sites/myforks/ml-global/mlbdlocal/wp-content/plugins/wp-copier
- * /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext
- * rm -rf /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext/wp-copier/*
- * cp -r /Users/mustofakamal/Sites/myforks/ml-global/mlbdlocal/wp-content/plugins/wp-copier/. /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext/wp-copier
- */
-
-
-function the_slug_exists($post_name, $post_type) {
-  global $wpdb;
-  if($wpdb->get_row("SELECT post_name FROM wp_posts WHERE post_name = '" . $post_name . "' AND post_type = '" . $post_type . "'", 'ARRAY_A')) {
-      return $wpdb->get_row("SELECT post_name FROM wp_posts WHERE post_name = '" . $post_name . "' AND post_type = '" . $post_type . "'", 'ARRAY_A');
-  } else {
-      return false;
-  }
-}
