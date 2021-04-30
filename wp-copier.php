@@ -78,7 +78,8 @@ function wp_copier_add_settings_page() {
         plugins_url( 'wp-copier/images/icon.png' ),
         6
     );
-    add_submenu_page(
+    $submenu = [];
+    $submenu[] = add_submenu_page(
       'wp-copier/options-settings.php',
       __( 'Copy by ID', 'wp_copier' ),
       __( 'Copy by ID', 'wp_copier' ),
@@ -86,6 +87,16 @@ function wp_copier_add_settings_page() {
       'wp-copier/copy_by_id.php',
       'add_ids_page',
       6
+    );
+    
+    $submenu[] = add_submenu_page(
+      'wp-copier/options-settings.php',
+      __( 'Content refactor', 'wp_copier' ),
+      __( 'Content refactor', 'wp_copier' ),
+      'manage_options',
+      'wp-copier/content_replair.php',
+      'repair_content',
+      7
     );
 }
 add_action( 'admin_menu', 'wp_copier_add_settings_page' );
@@ -98,6 +109,11 @@ function add_settings_page(){
 
 function add_ids_page(){
   require_once('admin/gui/add_ids_page.php');
+}
+
+
+function repair_content(){
+  require_once('admin/gui/repair_content.php');
 }
 
 
@@ -182,9 +198,10 @@ function custom_api_get_all_posts_callback( $request ) {
      */
     
     $posts = get_posts( array(
-            'paged' => $paged,
+            // 'paged' => $paged,
             'posts_per_page' => -1,            
-            'post_type' => array_values($allPostTypes) // This is the line that allows to fetch multiple post types. 
+            'post_type' => array_values($allPostTypes), // This is the line that allows to fetch multiple post types.
+            // 'fields' => 'ids',
         )
     );
     // Loop through the posts and push the desired data to the array we've initialized earlier in the form of an object
@@ -228,25 +245,28 @@ function custom_api_get_posts_callback( $request ) {
     $posts_data = array();
     $id = $request->get_param('key');
     $post_type = get_post_type($id);
-    $terms = get_object_taxonomies( $post_type );
-    
-    $post_thumbnail = ( has_post_thumbnail( $id ) ) ? get_the_post_thumbnail_url( $id ) : null;
-
-    $taxData= [];
-    foreach($terms as $key => $value){
-      if( get_the_terms($id, $value) ){
-        $taxData[] = get_the_terms($id, $value);
+    if($post_type){
+      $terms = get_object_taxonomies( $post_type );
+      
+      $post_thumbnail = ( has_post_thumbnail( $id ) ) ? get_the_post_thumbnail_url( $id ) : null;
+  
+      $taxData= [];
+      foreach($terms as $key => $value){
+        if( get_the_terms($id, $value) ){
+          $taxData[] = get_the_terms($id, $value);
+        }
       }
+      $posts_data[] = (object) array( 
+          'post' => get_post($id, 'ARRAY_A'), 
+          'post_meta' => get_post_meta($id), 
+          'featured_img_src' => $post_thumbnail,
+          'upload_dir' => wp_upload_dir(),
+          'terms' => $taxData,
+          'post_type' => $post_type
+      );             
+      return $posts_data;                   
     }
-    $posts_data[] = (object) array( 
-        'post' => get_post($id, 'ARRAY_A'), 
-        'post_meta' => get_post_meta($id), 
-        'featured_img_src' => $post_thumbnail,
-        'upload_dir' => wp_upload_dir(),
-        'terms' => $taxData,
-        'post_type' => $post_type
-    );             
-    return $posts_data;                   
+    return 0;
 } 
 
 /**
@@ -368,3 +388,13 @@ add_action( 'admin_enqueue_scripts', 'add_custom_css_to_admin' );
  * rm -rf /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext/wp-copier/*
  * cp -r /Users/mustofakamal/Sites/myforks/ml-global/mlbdlocal/wp-content/plugins/wp-copier/. /Users/mustofakamal/Sites/rnd/mlbd-local/mlbdlocal/ext/wp-copier
  */
+
+
+function the_slug_exists($post_name, $post_type) {
+  global $wpdb;
+  if($wpdb->get_row("SELECT post_name FROM wp_posts WHERE post_name = '" . $post_name . "' AND post_type = '" . $post_type . "'", 'ARRAY_A')) {
+      return $wpdb->get_row("SELECT post_name FROM wp_posts WHERE post_name = '" . $post_name . "' AND post_type = '" . $post_type . "'", 'ARRAY_A');
+  } else {
+      return false;
+  }
+}
