@@ -30,6 +30,9 @@ $taxArray = [];
         foreach($data->post as $itemKey => $itemValue){
           $postArray[$itemKey] = $itemValue; 
         }
+        $previousID = $postArray['ID'];
+        $previousURL = $postArray['guid'];
+
         unset($postArray['ID']); // Wordpress will assign a new Id
         unset($postArray['guid']); // Wordpress will add new guid
 
@@ -73,11 +76,16 @@ $taxArray = [];
 
         
         // Now we have new post Id in $newID lets add all metas
+        add_post_meta( $newID, 'wp-copier', '1');
+        add_post_meta( $newID, 'previous-id', $previousID);
+        add_post_meta( $newID, 'previous-url', $previousURL);
+        add_post_meta( $newID, 'copy-from', $url);
+
         $postMeta = $data->post_meta;
         foreach($postMeta as $postMetaKey => $postMetaValue){
 
           // Lets replace the thumbnil or feature image first: 
-          if($postMetaKey === '_thumbnail_id'){
+          if($postMetaKey === '_thumbnail_id'){ 
             // get the thumbnil image src / url 
             
             $attachmentDetails = save_attachement( 
@@ -102,7 +110,7 @@ $taxArray = [];
                 if(is_serialized( $innerArrayMetaValue )){
                   $thisInnerArrayMetaValue = unserialize($innerArrayMetaValue);
                   foreach($thisInnerArrayMetaValue as $metaValuename => $metaValueData){
-                    $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir);
+                    $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir, $url);
                     
                   }
                   add_post_meta($newID, $postMetaKey, $thisInnerArrayMetaValue);

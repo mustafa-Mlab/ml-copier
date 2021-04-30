@@ -137,11 +137,11 @@ function custom_api_get_all_posts() {
   /** 
    * Get post types posts's id with post type assign terms
    */
-    register_rest_route( 'custom/v1', '/all-posts', array(
-        'methods' => 'GET',
-        'callback' => 'custom_api_get_all_posts_callback',
-        'permission_callback' => '__return_true',
-    ));
+    // register_rest_route( 'custom/v1', '/all-posts', array(
+    //     'methods' => 'GET',
+    //     'callback' => 'custom_api_get_all_posts_callback',
+    //     'permission_callback' => '__return_true',
+    // ));
   
    /** 
    * Get all posts id and title with url
@@ -166,67 +166,68 @@ function custom_api_get_all_posts_types_callback($request){
   return ['post_types' =>  get_post_types(), 'taxonomies' => get_taxonomies('', 'objects')]; 
 }
 
-function custom_api_get_all_posts_callback( $request ) {
-    // Initialize the array that will receive the posts' data. 
-    $posts_data = array();
-    // Receive and set the page parameter from the $request for pagination purposes
-    $paged = $request->get_param( 'page' );
-    $limit = $request->get_param( 'limit' );
-    $paged = ( isset( $paged ) || ! ( empty( $paged ) ) ) ? $paged : 1; 
-    $postType = ($request->get_param('post_type'))? $request->get_param('post_type') : 0;
-    // Get the posts using the 'post' and 'news' post types
+// function custom_api_get_all_posts_callback( $request ) {
+//     // Initialize the array that will receive the posts' data. 
+//     $posts_data = array();
+//     // Receive and set the page parameter from the $request for pagination purposes
+//     $paged = $request->get_param( 'page' );
+//     $limit = $request->get_param( 'limit' );
+//     $paged = ( isset( $paged ) || ! ( empty( $paged ) ) ) ? $paged : 1; 
+//     $postType = ($request->get_param('post_type'))? $request->get_param('post_type') : 0;
+//     // Get the posts using the 'post' and 'news' post types
 
-    if(! $postType){
-      $allPostTypes = get_post_types();
-      unset($allPostTypes['revision']);
-      unset($allPostTypes['nav_menu_item']);
-      unset($allPostTypes['custom_css']);
-      unset($allPostTypes['customize_changeset']);
-      unset($allPostTypes['oembed_cache']);
-      unset($allPostTypes['user_request']);
-    }else{
-      $allPostTypes = array($postType);
-    }
+//     if(! $postType){
+//       $allPostTypes = get_post_types();
+//       unset($allPostTypes['revision']);
+//       unset($allPostTypes['nav_menu_item']);
+//       unset($allPostTypes['custom_css']);
+//       unset($allPostTypes['customize_changeset']);
+//       unset($allPostTypes['oembed_cache']);
+//       unset($allPostTypes['user_request']);
+//     }else{
+//       $allPostTypes = array($postType);
+//     }
 
-    $terms = get_object_taxonomies( $allPostTypes );
+//     $terms = get_object_taxonomies( $allPostTypes );
 
-    /**
-     * order, limit, 
-     * Return array should be like [ post_type => [posts =>[single_posts], terms], upload_directory]
-     * So that we can access part by part
-     * query will have pagination and order 
-     */
+//     /**
+//      * order, limit, 
+//      * Return array should be like [ post_type => [posts =>[single_posts], terms], upload_directory]
+//      * So that we can access part by part
+//      * query will have pagination and order 
+//      */
     
-    $posts = get_posts( array(
-            // 'paged' => $paged,
-            'posts_per_page' => -1,            
-            'post_type' => array_values($allPostTypes), // This is the line that allows to fetch multiple post types.
-            // 'fields' => 'ids',
-        )
-    );
-    // Loop through the posts and push the desired data to the array we've initialized earlier in the form of an object
-    foreach( $posts as $post ) {
-        $id = $post->ID; 
-        $post_thumbnail = ( has_post_thumbnail( $id ) ) ? get_the_post_thumbnail_url( $id ) : null;
+//     $posts = get_posts( array(
+//             // 'paged' => $paged,
+//             'posts_per_page' => -1,            
+//             'post_type' => array_values($allPostTypes), // This is the line that allows to fetch multiple post types.
+//             'fields' => 'ids',
+//         )
+//     );
+//     return $posts;
+//     // Loop through the posts and push the desired data to the array we've initialized earlier in the form of an object
+//     foreach( $posts as $post ) {
+//         $id = $post->ID; 
+//         $post_thumbnail = ( has_post_thumbnail( $id ) ) ? get_the_post_thumbnail_url( $id ) : null;
 
-        $taxData= [];
-        foreach($terms as $key => $value){
-          if( get_the_terms($id, $value) ){
-            $taxData[] = get_the_terms($id, $value);
-          }
-        }
-        $posts_data[] = (object) array( 
-            'post' => get_post($id, 'ARRAY_A'), 
-            'post_meta' => get_post_meta($id), 
-            'featured_img_src' => $post_thumbnail,
-            'upload_dir' => wp_upload_dir(),
-            // 'terms' => get_the_terms($id, $terms),
-            'terms' => $taxData,
-            // 'post-types' => $postType
-        );
-    }                 
-    return $posts_data;                   
-} 
+//         $taxData= [];
+//         foreach($terms as $key => $value){
+//           if( get_the_terms($id, $value) ){
+//             $taxData[] = get_the_terms($id, $value);
+//           }
+//         }
+//         $posts_data[] = (object) array( 
+//             'post' => get_post($id, 'ARRAY_A'), 
+//             'post_meta' => get_post_meta($id), 
+//             'featured_img_src' => $post_thumbnail,
+//             'upload_dir' => wp_upload_dir(),
+//             // 'terms' => get_the_terms($id, $terms),
+//             'terms' => $taxData,
+//             // 'post-types' => $postType
+//         );
+//     }                 
+//     return $posts_data;                   
+// } 
 
 
 function custom_api_get_all_posts_grab_callback( $request ){
@@ -282,7 +283,6 @@ function save_attachement( $args = [
   'id' => null
 ]){
   
-  // echo '<pre>'; var_dump($args); echo '</pre>'; 
   $upload_dir = wp_upload_dir();
   $image_data = file_get_contents( $args['url'] );
   $filename = basename( $args['url'] );
@@ -291,7 +291,6 @@ function save_attachement( $args = [
 
   $thisImagePath = str_replace($args['mainServerLocation']->baseurl, '', $args['url']);
   if(file_exists($upload_dir['basedir'] . '/' . $thisImagePath )){
-    // echo "Exist : " . $thisImagePath;
 
     return array(
       'url' => $upload_dir['baseurl'] . $thisImagePath ,
@@ -320,7 +319,6 @@ function save_attachement( $args = [
     require_once( ABSPATH . 'wp-admin/includes/image.php' );
     $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
     $attachmentIS = wp_update_attachment_metadata( $attach_id, $attach_data );
-    // echo "Not exist : " . wp_get_attachment_url($attach_id) ;
     return array(
       'url' => null,
       'id' => $attach_id
@@ -335,12 +333,24 @@ function save_attachement( $args = [
  * @return Array of processed data
  */
 
- function processMetadatas( $meta, $upload_dir ){
-  if(is_array($meta)){
-    foreach ($meta as $key => $value){
-      $meta[$key] = processMetadatas($value, $upload_dir);
-    }
-  }else{
+ function processMetadatas( $meta, $upload_dir, $url ){
+   if(is_array($meta)){
+     foreach ($meta as $key => $value){
+       $meta[$key] = processMetadatas($value, $upload_dir, $url);
+      }
+    }else{
+      if((int)$meta !== 0){
+        $thisPost = json_decode(file_get_contents($url . "/wp-json/custom/v1/my-posts?key={$meta}" ));
+        if($thisPost === 0){
+          return;
+        }else{
+          if(post_exists( $thisPost[0]->post->post_title)){
+            return post_exists( $thisPost[0]->post->post_title);
+          }else{
+            return;
+          }
+        }
+      }
     $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
     
     $ext = explode('.', $meta);
