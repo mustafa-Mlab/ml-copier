@@ -87,7 +87,7 @@ if( isset($_POST['submit'] )){
                 if(is_serialized( $innerArrayMetaValue )){
                   $thisInnerArrayMetaValue = unserialize($innerArrayMetaValue);
                   foreach($thisInnerArrayMetaValue as $metaValuename => $metaValueData){
-                    $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir);
+                    $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir, $url);
                     
                   }
                   add_post_meta($newID, $postMetaKey, $thisInnerArrayMetaValue);
