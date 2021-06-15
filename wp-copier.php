@@ -339,6 +339,14 @@ function save_attachement( $args = [
        $meta[$key] = processMetadatas($value, $upload_dir, $url);
       }
     }else{
+      /**
+       * $meta can be a string or integer or array
+       * if the meta is array then it will be processed in first condition, so here it can not be array
+       * if the meta is a string then type casting will return 0
+       * if the meta is integer typecasting will return integer value 
+       * if the meta is 0 then typecasting also return 0 
+       * so we need to test that after type casting it will be anything but 0 or before type casting and after type casting it will return same
+       */
       if((int)$meta !== 0){
         $thisPost = json_decode(file_get_contents($url . "/wp-json/custom/v1/my-posts?key={$meta}" ));
         if($thisPost === 0){
@@ -402,7 +410,7 @@ add_action( 'admin_enqueue_scripts', 'add_custom_css_to_admin' );
 
 function copySinglePost(){
   $url = $_POST['url'];
-  $postID = $_POST['formData'];
+  $postID = $_POST['postID'];
   $posts = json_decode(file_get_contents($url . "/wp-json/custom/v1/my-posts?key={$postID}" ));
   if(! post_exists($posts[0]->post->post_title, '', '', $posts[0]->post_type)){
     // Create the post first
@@ -507,7 +515,7 @@ function copySinglePost(){
       }
     } 
   }
-  echo $newID ;
+  echo json_encode($newID) ;
 }
 
 add_action( 'wp_ajax_copySinglePost', 'copySinglePost' );

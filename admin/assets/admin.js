@@ -42,15 +42,31 @@
       $('input[name="posts[]"]').each( function(index, value){
         if($(value).prop("checked")){
           $('.report .items-started').append('<li>' + $(value).val() + ' started to copying</li>');
-          $.post(ajax.ajaxurl, {
-            dataType: "json",
+          $.ajax({
+            type: 'POST',
+            url: ajax.ajaxurl,
             action: "copySinglePost",
-            formData: $(value).val(),
-            url: $("#url").val()
-          })
-          .then(function(response) {
-            $('.report .items-finished').append('<li>' + $(value).val() + ' ended copying as ' + response + ' </li>');
+            data: {
+              'action' : "copySinglePost",
+              'url' : $("#url").val(),
+              'postID' : $(value).val()
+            },
+            success: function(response){
+              console.log(response);
+              $('.report .items-finished').append('<li>' + $(value).val() + ' ended copying as ' + response + ' </li>');
+            },
+            dataType: "json",
+            async:false
           });
+          //   $.post(ajax.ajaxurl, {
+          //     dataType: "json",
+          //     action: "copySinglePost",
+          //     formData: $(value).val(),
+          //     url: $("#url").val()
+          //   })
+          //   .then(function(response) {
+          //     $('.report .items-finished').append('<li>' + $(value).val() + ' ended copying as ' + response + ' </li>');
+          //   });
         }
       });
     });
