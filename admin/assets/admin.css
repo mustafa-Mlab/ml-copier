@@ -15,3 +15,21 @@
   overflow-y: scroll;
   display: none;
 }
+
+.report {
+  /* margin-left: 10%; */
+  /* margin-right: 10%; */
+  width: 100%;
+  display: block;
+}
+
+.report ul.items-started {
+  width: 49%;
+  float: left;
+}
+
+.report ul.items-finished {
+  display: block;
+  width: 49%;
+  float: right;
+}
