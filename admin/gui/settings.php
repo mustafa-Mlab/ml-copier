@@ -45,6 +45,7 @@ $taxArray = [];
             preg_match_all('/(src=")([^"]*)"/i',$img_tag, $img[$img_tag]);
           }
         }
+        
         $processedImg = array();
         foreach($img as $imgKey => $imgTag){
           $attachmentDetails = save_attachement( 
@@ -56,6 +57,10 @@ $taxArray = [];
             $processedImg[end($imgTag)[0]] = $attachmentDetails['url'];
           }
         }
+        foreach($processedImg as $mainLink => $actualLink){
+          $postContent = str_replace( $mainLink,$actualLink, $postContent);
+        }
+        $postArray['post_content'] = $postContent;
         /** upload respactive image inside post content */
         
         $postArray['post_author'] = get_current_user_id(); // Current user will be the author of this post
