@@ -12,7 +12,7 @@
         var thisPostTypeContainer = $(this).closest('.postTyperow').find('.id-specific-section .id-specific-posts');
         $.get(url, function(data, status){
           $(data).each(function(index, value){
-            $(thisPostTypeContainer).append('<li><input type="checkbox" name="posts[]" value="' + value.ID + '" checked ><lable for="posts">' + value.post_title + '</lable></li> ');
+            $(thisPostTypeContainer).append('<li><label><input type="checkbox" name="posts[]" value="' + value.ID + '" checked >' + value.post_title + '</label></li> ');
           });
         });
     }else{

@@ -171,12 +171,16 @@ $taxArray = [];
       foreach($postTypes as $key => $value){
     ?>
       <div class="postTyperow">
-        <input type="checkbox" name="checkboxArray[]" class="postTypeInputBox" value="<?= $value; ?>" <?= ( $flag && in_array($value , $checkboxArray)) ? 'checked' :''; ?>>
-        <label> <?= ucfirst($value); ?></label><br>
+        <label> 
+          <input type="checkbox" name="checkboxArray[]" class="postTypeInputBox" value="<?= $value; ?>" <?= ( $flag && in_array($value , $checkboxArray)) ? 'checked' :''; ?>>
+          <?= ucfirst($value); ?>
+        </label><br>
         <div class="fetch-data">
           <div class="all-section">
-            <input type="checkbox" name="get-all" id="get-all-<?= $value;?>" class="get-all" checked>
-            <label for="get-all">Scrab All</label>
+            <label>
+              <input type="checkbox" name="get-all" id="get-all-<?= $value;?>" class="get-all" checked>
+              Scrab All
+            </label>
           </div>
           <div class="id-specific-section">
             <ul class="id-specific-posts">
@@ -187,47 +191,6 @@ $taxArray = [];
       <?php  } ?>
     
     <br> <br>
-    <?php /**
-    <hr>
-    <h2>Taxonomies</h2>
-    <?php 
-      $taxonomies = $_SESSION['list']->taxonomies;
-      unset($taxonomies->nav_menu);
-      unset($taxonomies->link_category);
-      unset($taxonomies->post_format);
-      foreach($taxonomies as $key => $value){
-    ?>
-        <input type="checkbox" name="taxArray[]" value="<?= $value->name; ?>" <?= ( $flag && in_array($value->name , $taxArray)) ? 'checked' :''; ?>>
-        <label> <?= ucfirst($value->label .' --> ' . str_replace('"', '', json_encode( implode(',', $value->object_type)))); ?></label><br>
-      <?php  } ?>
-    
-    <br> <br>
-    <hr>
-    <label for="limit">Limit</label>
-    <input type="number" name="limit" id="limit" value="<?= ( isset( $_POST['limit'] ) )? $_POST['limit'] : "" ; ?>">
-    <br><br>
-    
-    <hr>
-    <label for="order-by">Order BY</label>
-    <select name="order-by" id="order-by" >
-      <option value="none" selected>None</option>
-      <option value="ID" >ID</option>
-      <option value="author" >Author</option>
-      <option value="title">Title</option>
-      <option value="name">Name</option>
-      <option value="date">Date</option>
-      <option value="modified">Modified</option>
-      <option value="rand">Rand</option>
-    </select>
-    <br><br>
-    <hr>
-    <label for="order">Order</label>
-    <select name="order" id="order" >
-      <option value="ASC">Ascending</option>
-      <option value="DESC">Descending</option>
-    </select>
-    <br><br>
-     */ ?>
     <input type="submit" value="Start Copy" name="submit" style="position: fixed; bottom: 50px; right: 2%;">
   </form>
   <?php }  ?>
