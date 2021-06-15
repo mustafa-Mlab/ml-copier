@@ -347,7 +347,7 @@ function save_attachement( $args = [
        * if the meta is 0 then typecasting also return 0 
        * so we need to test that after type casting it will be anything but 0 or before type casting and after type casting it will return same
        */
-      if((int)$meta !== 0){
+      if((int)$meta !== 0 && (int)$meta !== 1 && strlen((int)$data) == strlen($data)){
         $thisPost = json_decode(file_get_contents($url . "/wp-json/custom/v1/my-posts?key={$meta}" ));
         if($thisPost === 0){
           return;
