@@ -8,7 +8,7 @@
 .id-specific-section {
   background: #ccc;
   padding: 5px 30px;
-  width: calc(100% - 43%);
+  width: calc(100% - 20%);
   margin-top: 16px;
   margin-bottom: 16px;
   max-height: 185px;
@@ -32,4 +32,12 @@
   display: block;
   width: 49%;
   float: right;
+}
+.loading {
+  display: none;
+  margin: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
