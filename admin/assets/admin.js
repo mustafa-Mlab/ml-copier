@@ -3,6 +3,7 @@
 (function($) {
   $(document).ready(function() {
     $('.postTypeInputBox').change(function(e){
+      var checkbox = this;
       if(this.checked) {
         $(this).closest('.postTyperow').find('.fetch-data').show();
         var postType = $(this).val();
@@ -11,8 +12,10 @@
         
         var thisPostTypeContainer = $(this).closest('.postTyperow').find('.id-specific-section .id-specific-posts');
         $.get(url, function(data, status){
+          $(checkbox).closest('.postTyperow').find('.fetch-data label .post-counter').text(" (" + data.length + ")");
           $(data).each(function(index, value){
-            $(thisPostTypeContainer).append('<li><label><input type="checkbox" name="posts[]" class="posts" value="' + value.ID + '" checked >' + value.post_title + '</label></li> ');
+            // console.log(value);
+            $(thisPostTypeContainer).append('<li><label><input type="checkbox" name="posts[]" class="posts" value="' + value.ID + '" checked >' + value.post_title + ' || Published : ' + value.post_date + ' || Modified: ' + value.post_modified + ' || Status: ' + value.post_status + ' </label></li> ');
           });
         });
     }else{
@@ -37,8 +40,8 @@
     // Make ajax requests
 
     $('#wp_copier_form').submit(function (e){
-      e.preventDefault();
-      $('.report').append("<h4 class='status'>Please do not close the browser tab, posts are started copying</h4>");
+      $('.report').append("<h4 class='status'>Please do not close the browser tab, posts are started to copying</h4>");
+      $('.report .loading').show();
       $('input[name="posts[]"]').each( function(index, value){
         if($(value).prop("checked")){
           $('.report .items-started').append('<li>' + $(value).val() + ' started to copying</li>');
@@ -52,23 +55,15 @@
               'postID' : $(value).val()
             },
             success: function(response){
-              console.log(response);
               $('.report .items-finished').append('<li>' + $(value).val() + ' ended copying as ' + response + ' </li>');
             },
             dataType: "json",
             async:false
           });
-          //   $.post(ajax.ajaxurl, {
-          //     dataType: "json",
-          //     action: "copySinglePost",
-          //     formData: $(value).val(),
-          //     url: $("#url").val()
-          //   })
-          //   .then(function(response) {
-          //     $('.report .items-finished').append('<li>' + $(value).val() + ' ended copying as ' + response + ' </li>');
-          //   });
         }
       });
+      $('.report .loading').hide();
+      e.preventDefault();
     });
   })
 })(jQuery);

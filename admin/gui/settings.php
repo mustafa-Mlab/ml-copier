@@ -179,7 +179,7 @@ $taxArray = [];
           <div class="all-section">
             <label>
               <input type="checkbox" name="get-all" id="get-all-<?= $value;?>" class="get-all" checked>
-              Scrab All
+              Scrab All <span class="post-counter"></span>
             </label>
           </div>
           <div class="id-specific-section">
@@ -195,6 +195,7 @@ $taxArray = [];
   </form>
 
   <div class="report">
+    <div class="loading"><img src="<?= plugin_dir_url( dirname( __FILE__ ) ) ?>assets/loading.gif" alt="loading"></div>
     <ul class="items-started"></ul>
     <ul class="items-finished"></ul>
   </div>

@@ -234,7 +234,8 @@ function custom_api_get_all_posts_grab_callback( $request ){
   // Initialize the array that will receive the posts' data. 
   $posts = get_posts( array(
     'posts_per_page' => -1,            
-    'post_type' => $request->get_param('post_type') // This is the line that allows to fetch multiple post types. 
+    'post_type' => $request->get_param('post_type'), // This is the line that allows to fetch multiple post types.
+    'post_status' => array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash') 
   ));
              
   return $posts; 
@@ -441,7 +442,7 @@ function copySinglePost(){
         array( 'url' => preg_replace('/(-[0-9]*x[0-9]*)/m', '', end($imgTag)[0]), 'mainServerLocation' => $data->upload_dir ) 
       );
       if($attachmentDetails['id']){
-        $processedImg[end($imgTag)[0]] = $attachmentDetails['id'];
+        $processedImg[end($imgTag)[0]] = wp_get_attachment_url($attachmentDetails['id']);
       }else{
         $processedImg[end($imgTag)[0]] = $attachmentDetails['url'];
       }
