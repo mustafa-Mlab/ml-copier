@@ -195,9 +195,13 @@ $taxArray = [];
   </form>
 
   <div class="report">
+    <h4 class="status"></h4>
     <div class="loading"><img src="<?= plugin_dir_url( dirname( __FILE__ ) ) ?>assets/loading.gif" alt="loading"></div>
-    <ul class="items-started"></ul>
-    <ul class="items-finished"></ul>
+    <div class="item-list">
+      <ul class="items-started"></ul>
+      <ul class="items-finished"></ul>  
+    </div>
+    <h4 class="status-ends"></h4>
   </div>
   <?php }  ?>
   </div>

@@ -41,3 +41,26 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+h4.status-ends {
+  clear: both;
+}
+h4.status {
+  clear: both;
+}
+.report {
+  display: none;
+  position: fixed;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,.795);
+  padding: 50%;
+  z-index: 9999999999;
+  color: white;
+  padding-right: 20%;
+}
+
+.item-list {
+  width: 100%;
+}

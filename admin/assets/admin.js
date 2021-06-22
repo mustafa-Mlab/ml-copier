@@ -37,33 +37,56 @@
       }
     });
 
+    /**
+     * make Ajax call
+     * @value POST ID
+     */
+    function makeAjaxCall(postID){
+      $.ajax({
+        type: 'POST',
+        url: ajax.ajaxurl,
+        data: {
+          'action' : "copySinglePost",
+          'url' : $("#url").val(),
+          'postID' : postID
+        },
+        success: function(response){
+          $('.report .items-finished').append('<li>' + postID + ' ended copying as ' + response + ' </li>');
+        },
+        async:false
+      });
+    }
     // Make ajax requests
 
     $('#wp_copier_form').submit(function (e){
-      $('.report').append("<h4 class='status'>Please do not close the browser tab, posts are started to copying</h4>");
-      $('.report .loading').show();
-      $('input[name="posts[]"]').each( function(index, value){
-        if($(value).prop("checked")){
-          $('.report .items-started').append('<li>' + $(value).val() + ' started to copying</li>');
-          $.ajax({
-            type: 'POST',
-            url: ajax.ajaxurl,
-            action: "copySinglePost",
-            data: {
-              'action' : "copySinglePost",
-              'url' : $("#url").val(),
-              'postID' : $(value).val()
-            },
-            success: function(response){
-              $('.report .items-finished').append('<li>' + $(value).val() + ' ended copying as ' + response + ' </li>');
-            },
-            dataType: "json",
-            async:false
-          });
-        }
-      });
-      $('.report .loading').hide();
       e.preventDefault();
+      
+      const posts =  $('input[name="posts[]"]');
+      const sleep = (ms) => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      };
+      const getNumFruit = (post) => {
+        return sleep(1000).then((v) => {
+          $('.report .items-started').append('<li>' + $(post).val() + ' started to copying</li>');
+          makeAjaxCall($(post).val());
+        });
+      };
+      const forLoop = async (_) => {
+        $(".report").show();
+        $('.report .status').text("Please do not close the browser tab, posts are started to copying");
+        $('.report .loading').show();
+        for (let index = 0; index < posts.length; index++) {
+          const post = posts[index];
+          await getNumFruit(post);
+          // const numFruit = await getNumFruit(post);
+          // console.log(numFruit);
+        }
+        $('.report .status-ends').text("All task is finished you can close the tab now");
+        $('.report .loading').hide();
+        $(".report").hide();
+      };
+      forLoop();
+
     });
   })
 })(jQuery);
