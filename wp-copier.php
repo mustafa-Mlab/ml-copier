@@ -74,7 +74,7 @@ function wp_copier_add_settings_page() {
         'WP Copier Settings',
         'manage_options',
         'wp-copier/options-settings.php',
-        'add_settings_page',
+        'nwc_add_settings_page',
         plugins_url( 'wp-copier/images/icon.png' ),
         6
     );
@@ -85,7 +85,7 @@ function wp_copier_add_settings_page() {
       __( 'Copy by ID', 'wp_copier' ),
       'manage_options',
       'wp-copier/copy_by_id.php',
-      'add_ids_page',
+      'nwc_add_ids_page',
       6
     );
     
@@ -95,24 +95,24 @@ function wp_copier_add_settings_page() {
       __( 'Content refactor', 'wp_copier' ),
       'manage_options',
       'wp-copier/content_replair.php',
-      'repair_content',
+      'nwc_repair_content',
       7
     );
 }
 add_action( 'admin_menu', 'wp_copier_add_settings_page' );
 
 
-function add_settings_page(){
+function nwc_add_settings_page(){
   require_once('admin/gui/settings.php');
 }
 
 
-function add_ids_page(){
+function nwc_add_ids_page(){
   require_once('admin/gui/add_ids_page.php');
 }
 
 
-function repair_content(){
+function nwc_repair_content(){
   require_once('admin/gui/repair_content.php');
 }
 
@@ -123,15 +123,15 @@ function repair_content(){
  * 1. To get all the post_IDs for single or multiple post type with limit and order
  * 2. To get single post data by ID
  */
-add_action( 'rest_api_init', 'custom_api_get_all_posts' );   
+add_action( 'rest_api_init', 'nwc_custom_api_get_all_posts' );   
 
-function custom_api_get_all_posts() {
+function nwc_custom_api_get_all_posts() {
   /**
    * Get all post types and taxonomies list
    */
   register_rest_route( 'custom/v1', '/all-posts-types', array(
     'methods' => 'GET',
-    'callback' => 'custom_api_get_all_posts_types_callback',
+    'callback' => 'nwc_custom_api_get_all_posts_types_callback',
     'permission_callback' => '__return_true',
   ));
   /** 
@@ -139,7 +139,7 @@ function custom_api_get_all_posts() {
    */
     // register_rest_route( 'custom/v1', '/all-posts', array(
     //     'methods' => 'GET',
-    //     'callback' => 'custom_api_get_all_posts_callback',
+    //     'callback' => 'nwc_custom_api_get_all_posts_callback',
     //     'permission_callback' => '__return_true',
     // ));
   
@@ -148,7 +148,7 @@ function custom_api_get_all_posts() {
    */
     register_rest_route( 'custom/v1', '/all-posts-grab', array(
       'methods' => 'GET',
-      'callback' => 'custom_api_get_all_posts_grab_callback',
+      'callback' => 'nwc_custom_api_get_all_posts_grab_callback',
       'permission_callback' => '__return_true',
   ));
 
@@ -157,12 +157,12 @@ function custom_api_get_all_posts() {
    */
     register_rest_route( 'custom/v1', '/my-posts', array(
         'methods' => 'GET',
-        'callback' => 'custom_api_get_posts_callback',
+        'callback' => 'nwc_custom_api_get_posts_callback',
         'permission_callback' => '__return_true',
     ));
 }
 
-function custom_api_get_all_posts_types_callback($request){
+function nwc_custom_api_get_all_posts_types_callback($request){
   return ['post_types' =>  get_post_types(), 'taxonomies' => get_taxonomies('', 'objects')]; 
 }
 
@@ -230,7 +230,7 @@ function custom_api_get_all_posts_types_callback($request){
 // } 
 
 
-function custom_api_get_all_posts_grab_callback( $request ){
+function nwc_custom_api_get_all_posts_grab_callback( $request ){
   // Initialize the array that will receive the posts' data. 
   $posts = get_posts( array(
     'posts_per_page' => -1,            
@@ -242,7 +242,7 @@ function custom_api_get_all_posts_grab_callback( $request ){
 
 }
 
-function custom_api_get_posts_callback( $request ) {
+function nwc_custom_api_get_posts_callback( $request ) {
     // Initialize the array that will receive the posts' data. 
     $posts_data = array();
     $id = $request->get_param('key');
@@ -377,7 +377,7 @@ function save_attachement( $args = [
 
 
 
- function register_my_session()
+ function nwc_register_my_session()
 {
   if( !session_id() )
   {
@@ -385,7 +385,7 @@ function save_attachement( $args = [
   }
 }
 
-add_action('init', 'register_my_session');
+add_action('init', 'nwc_register_my_session');
 
 
 /**
@@ -393,7 +393,7 @@ add_action('init', 'register_my_session');
  *
  * @param int $hook Hook suffix for the current admin page.
  */
-function add_custom_css_to_admin( $hook ) {
+function nwc_add_custom_css_to_admin( $hook ) {
   if ( 'toplevel_page_wp-copier/options-settings' == $hook || 'top-copier-settings_page_wp-copier/copy_by_id' == $hook ) {
     
     wp_enqueue_script( 'wp_copier_custom_js', plugin_dir_url( __FILE__ ) . 'admin/assets/admin.js', array('jquery'), '1.0' );
@@ -407,9 +407,9 @@ function add_custom_css_to_admin( $hook ) {
     wp_enqueue_style( 'wp_copier_custom_css', plugin_dir_url( __FILE__ ) . 'admin/assets/admin.css', '', '1');
   }
 }
-add_action( 'admin_enqueue_scripts', 'add_custom_css_to_admin' );
+add_action( 'admin_enqueue_scripts', 'nwc_add_custom_css_to_admin' );
 
-function copySinglePost(){
+function nwc_copySinglePost(){
   $url = $_POST['url'];
   $postID = $_POST['postID'];
   $posts = json_decode(file_get_contents($url . "/wp-json/custom/v1/my-posts?key={$postID}" ));
@@ -474,6 +474,7 @@ function copySinglePost(){
     add_post_meta( $newID, 'previous-id', $previousID);
     add_post_meta( $newID, 'previous-url', $previousURL);
     add_post_meta( $newID, 'copy-from', $url);
+    add_post_meta( $newID, 'copy-time', current_datetime());
 
     $postMeta = $data->post_meta;
     foreach($postMeta as $postMetaKey => $postMetaValue){
@@ -519,5 +520,5 @@ function copySinglePost(){
   echo json_encode($newID) ;
 }
 
-add_action( 'wp_ajax_copySinglePost', 'copySinglePost' );
-add_action( 'wp_ajax_nopriv_copySinglePost', 'copySinglePost' );
+add_action( 'wp_ajax_copySinglePost', 'nwc_copySinglePost' );
+add_action( 'wp_ajax_nopriv_copySinglePost', 'nwc_copySinglePost' );

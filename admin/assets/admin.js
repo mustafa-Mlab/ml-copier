@@ -83,7 +83,7 @@
         }
         $('.report .status-ends').text("All task is finished you can close the tab now");
         $('.report .loading').hide();
-        $(".report").hide();
+        // $(".report").hide();
       };
       forLoop();
 
