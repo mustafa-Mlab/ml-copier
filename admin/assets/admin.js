@@ -2,6 +2,10 @@
 
 (function($) {
   $(document).ready(function() {
+
+    var failed = [];
+    var passed =[];
+
     $('.postTypeInputBox').change(function(e){
       var checkbox = this;
       if(this.checked) {
@@ -51,6 +55,13 @@
           'postID' : postID
         },
         success: function(response){
+          if(response === 'null'){
+            failed.push(postID);
+          }else{
+            passed.push(postID);
+            // passed[postID] = response;
+          }
+          console.log(response);
           $('.report .items-finished').append('<li>' + postID + ' ended copying as ' + response + ' </li>');
         },
         async:false
@@ -61,7 +72,7 @@
     $('#wp_copier_form').submit(function (e){
       e.preventDefault();
       
-      const posts =  $('input[name="posts[]"]');
+      const posts =  $('input[name="posts[]"]:checked');
       const sleep = (ms) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
       };
@@ -84,8 +95,11 @@
         $('.report .status-ends').text("All task is finished you can close the tab now");
         $('.report .loading').hide();
         // $(".report").hide();
+        console.log("Passed: ", passed, "Failed: ", failed);
       };
       forLoop();
+      
+
 
     });
   })

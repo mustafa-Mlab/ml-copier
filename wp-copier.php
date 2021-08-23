@@ -518,6 +518,7 @@ function nwc_copySinglePost(){
     } 
   }
   echo json_encode($newID) ;
+  exit();
 }
 
 add_action( 'wp_ajax_copySinglePost', 'nwc_copySinglePost' );
