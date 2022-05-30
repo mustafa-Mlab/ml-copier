@@ -235,7 +235,7 @@ function nwc_custom_api_get_all_posts_grab_callback( $request ){
   $posts = get_posts( array(
     'posts_per_page' => -1,            
     'post_type' => $request->get_param('post_type'), // This is the line that allows to fetch multiple post types.
-    'post_status' => array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash') 
+    'post_status' => array('publish', 'pending', 'draft', 'future', 'private', 'inherit') 
   ));
              
   return $posts; 
@@ -334,10 +334,18 @@ function save_attachement( $args = [
  * @return Array of processed data
  */
 
- function processMetadatas( $meta, $upload_dir, $url ){
+ function processMetadatas( $meta, $upload_dir, $url, $flag = NULL, $key ){
    if(is_array($meta)){
      foreach ($meta as $key => $value){
-       $meta[$key] = processMetadatas($value, $upload_dir, $url);
+       if($key === 'id' && isset($_SESSION['thisAttachmentID'])) {
+         $meta[$key] = $_SESSION['thisAttachmentID'];
+         unset($_SESSION['thisAttachmentID']);
+       }else{
+         if( isset($_SESSION['thisAttachmentID'])){
+           unset($_SESSION['thisAttachmentID']);
+         }
+        $meta[$key] = processMetadatas($value, $upload_dir, $url, $flag, $key);
+       }
       }
     }else{
       /**
@@ -361,14 +369,15 @@ function save_attachement( $args = [
         }
       }
     $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
-    
     $ext = explode('.', $meta);
     if(in_array(end($ext), $supported_image)){
       $attachmentDetails = save_attachement( array('url' => $meta, 'mainServerLocation' => $upload_dir ) );
       if( $attachmentDetails['url'] ){
         $meta = $attachmentDetails['url'];
       }else{
+        $flag = 1;
         $meta = wp_get_attachment_url($attachmentDetails['id']);
+        $_SESSION['thisAttachmentID'] = $attachmentDetails['id'];
       }
     }
   }
@@ -505,7 +514,7 @@ function nwc_copySinglePost(){
             if(is_serialized( $innerArrayMetaValue )){
               $thisInnerArrayMetaValue = unserialize($innerArrayMetaValue);
               foreach($thisInnerArrayMetaValue as $metaValuename => $metaValueData){
-                $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir, $url);
+                $thisInnerArrayMetaValue[$metaValuename] = processMetadatas($metaValueData, $data->upload_dir, $url, $flag = 0, $innerArrayMetaValueKey);
               }
               add_post_meta($newID, $postMetaKey, $thisInnerArrayMetaValue);
             }else{
