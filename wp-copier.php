@@ -342,7 +342,7 @@ function save_attachement( $args = [
          unset($_SESSION['thisAttachmentID']);
        }else{
          if( isset($_SESSION['thisAttachmentID'])){
-           unset($_SESSION['thisAttachmentID'])
+           unset($_SESSION['thisAttachmentID']);
          }
         $meta[$key] = processMetadatas($value, $upload_dir, $url, $flag, $key);
        }
