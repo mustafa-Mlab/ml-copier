@@ -52,6 +52,7 @@
      * @value POST ID
      */
     function makeAjaxCall(postID){
+      console.log(postID);
       $.ajax({
         type: 'POST',
         url: ajax.ajaxurl,
@@ -80,31 +81,31 @@
       
       const posts =  $('input[name="posts[]"]:checked');
       console.log(posts);
-      // const sleep = (ms) => {
-      //   return new Promise((resolve) => setTimeout(resolve, ms));
-      // };
-      // const getNumFruit = (post) => {
-      //   return sleep(1000).then((v) => {
-      //     $('.report .items-started').append('<li>' + $(post).val() + ' started to copying</li>');
-      //     makeAjaxCall($(post).val());
-      //   });
-      // };
-      // const forLoop = async (_) => {
-      //   $(".report").show();
-      //   $('.report .status').text("Please do not close the browser tab, posts are started to copying");
-      //   $('.report .loading').show();
-      //   for (let index = 0; index < posts.length; index++) {
-      //     const post = posts[index];
-      //     await getNumFruit(post);
-      //     // const numFruit = await getNumFruit(post);
-      //     // console.log(numFruit);
-      //   }
-      //   $('.report .status-ends').text("All task is finished you can close the tab now");
-      //   $('.report .loading').hide();
-      //   // $(".report").hide();
-      //   console.log("Passed: ", passed, "Failed: ", failed);
-      // };
-      // forLoop();
+      const sleep = (ms) => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      };
+      const getNumFruit = (post) => {
+        return sleep(1000).then((v) => {
+          $('.report .items-started').append('<li>' + $(post).val() + ' started to copying</li>');
+          makeAjaxCall($(post).val());
+        });
+      };
+      const forLoop = async (_) => {
+        $(".report").show();
+        $('.report .status').text("Please do not close the browser tab, posts are started to copying");
+        $('.report .loading').show();
+        for (let index = 0; index < posts.length; index++) {
+          const post = posts[index];
+          await getNumFruit(post);
+          // const numFruit = await getNumFruit(post);
+          // console.log(numFruit);
+        }
+        $('.report .status-ends').text("All task is finished you can close the tab now");
+        $('.report .loading').hide();
+        // $(".report").hide();
+        console.log("Passed: ", passed, "Failed: ", failed);
+      };
+      forLoop();
     });
   })
 })(jQuery);

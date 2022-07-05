@@ -21,6 +21,8 @@
   /* margin-right: 10%; */
   width: 100%;
   display: block;
+  overflow-y: scroll;
+  height: 100vh;
 }
 
 .report ul.items-started {
@@ -59,6 +61,8 @@ h4.status {
   z-index: 9999999999;
   color: white;
   padding-right: 20%;
+  overflow-y: scroll;
+  height: 100vh;
 }
 
 .item-list {
