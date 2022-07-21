@@ -51,7 +51,7 @@
      * make Ajax call
      * @value POST ID
      */
-    function makeAjaxCall(postID){
+     function makeAjaxCall(postID){
       console.log(postID);
       $.ajax({
         type: 'POST',
@@ -104,6 +104,10 @@
         $('.report .loading').hide();
         // $(".report").hide();
         console.log("Passed: ", passed, "Failed: ", failed);
+
+        $(".close-repost").click(function(){
+          $(".report").hide();
+        });
       };
       forLoop();
     });

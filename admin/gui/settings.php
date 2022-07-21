@@ -195,6 +195,7 @@ $taxArray = [];
   </form>
 
   <div class="report">
+    <button class="close-repost">X</button>
     <h4 class="status"></h4>
     <div class="loading"><img src="<?= plugin_dir_url( dirname( __FILE__ ) ) ?>assets/loading.gif" alt="loading"></div>
     <div class="item-list">

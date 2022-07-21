@@ -532,3 +532,78 @@ function nwc_copySinglePost(){
 
 add_action( 'wp_ajax_copySinglePost', 'nwc_copySinglePost' );
 add_action( 'wp_ajax_nopriv_copySinglePost', 'nwc_copySinglePost' );
+
+
+function repaireContent(){
+
+  /* 
+  * Repair authors data for authors page 
+  */
+  // $authors = get_posts( array(
+  //     'posts_per_page' => -1,
+  //     'post_type' => 'ml-author',
+  //   ) );
+  // foreach($authors as $key => $value){
+  //   $currentID = $value->ID;
+  //   $previousID = get_post_meta( $value->ID, 'previous-id', true);
+  //   $blogs = get_posts( $args = array(
+  //     'post_type'  => 'ml-expertinsights',
+  //     'posts_per_page' => -1,
+  //     'meta_query' => array(
+  //       array(
+  //         'key' => 'ml_authors',
+  //         'value' => $previousID,
+  //         'compare' => 'LIKE'
+  //       )
+  //     )
+  //   ) );
+  //   foreach( $blogs as $index => $data){
+  //     $oldAuthors =  get_post_meta($data->ID, 'ml_authors' )[1];
+  //     $authorsHere = explode(',', $oldAuthors);
+  //     foreach($authorsHere as $arrindex => $arrval){
+  //       if($arrval == $previousID){
+  //         $authorsHere[$arrindex] = $currentID;
+  //       }
+  //     }
+  //     $authorsHere = implode(',', $authorsHere);
+  //     update_post_meta( $data->ID, 'ml_authors', $authorsHere,  $oldAuthors );
+  //   }
+  // }
+
+  /* 
+  *  Repair authros id for experinsights
+  */
+  // $blogs = get_posts( array(
+  //   'posts_per_page' => -1,
+  //   'post_type' => 'ml-expertinsights',
+  // ) );
+
+  // foreach( $blogs as $key => $blog){
+  //   $blogMeta = get_post_meta($blog->ID, 'expert_insight_post_meta', true);
+  //   if (array_key_exists( "ml-expertinsights-authors", $blogMeta )){
+  //     $author = $blogMeta['ml-expertinsights-authors'];
+  //     foreach($author as $key => $value){
+  //       $authorHere = get_posts( $args = array(
+  //         'post_type'  => 'ml-author',
+  //         'posts_per_page' => -1,
+  //         'meta_query' => array(
+  //           array(
+  //             'key' => 'previous-id',
+  //             'value' => $value,
+  //             'compare' => 'LIKE'
+  //           )
+  //         )
+  //       ) );
+  //       if( $authorHere ){
+  //         $blogMeta['ml-expertinsights-authors'][$key] = $authorHere[0]->ID;
+  //         $blogMeta = serialize($blogMeta);
+  //         update_post_meta( $blog->ID, 'expert_insight_post_meta', $blogMeta );
+  //       }
+  //     }
+
+  //   }
+  // }
+
+  /* Author content repaired */
+
+}
